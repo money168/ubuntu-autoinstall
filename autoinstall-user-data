@@ -1,0 +1,83 @@
+#cloud-config
+autoinstall:
+  apt:
+    disable_components: []
+    geoip: true
+    preserve_sources_list: false
+    primary:
+    - arches:
+      - amd64
+      - i386
+      uri: http://tw.archive.ubuntu.com/ubuntu
+    - arches:
+      - default
+      uri: http://ports.ubuntu.com/ubuntu-ports
+  drivers:
+    install: false
+  identity:
+    hostname: bee01
+    password: $6$LsouW3ALRe9VvX1C$jM1tu6Amscsv5nW79OsZ0sONHk16zjvgkmELthSwqqpVM36y7bMk82hWaokJeKVao5bO91L0luFAJb0JN9GC4/
+    realname: bee01
+    username: bee01
+  kernel:
+    package: linux-generic
+  keyboard:
+    layout: us
+    toggle: null
+    variant: ''
+  locale: en_US.UTF-8
+  network:
+    ethernets:
+      ens160:
+        dhcp4: true
+      ens192:
+        dhcp4: true
+      ens224:
+        dhcp4: true
+    version: 2
+  source:
+    id: ubuntu-server-minimal
+    search_drivers: false
+  ssh:
+    allow-pw: true
+    authorized-keys: []
+    install-server: true
+  storage:
+    config:
+    - ptable: gpt
+      path: /dev/sda
+      wipe: superblock-recursive
+      preserve: false
+      name: ''
+      grub_device: true
+      type: disk
+      id: disk-sda
+    - device: disk-sda
+      size: 1048576
+      flag: bios_grub
+      number: 1
+      preserve: false
+      grub_device: false
+      offset: 1048576
+      type: partition
+      id: partition-2
+    - device: disk-sda
+      size: 42946527232
+      wipe: superblock
+      number: 2
+      preserve: false
+      grub_device: false
+      offset: 2097152
+      type: partition
+      id: partition-3
+    - fstype: ext4
+      volume: partition-3
+      preserve: false
+      type: format
+      id: format-1
+    - path: /
+      device: format-1
+      type: mount
+      id: mount-1
+  updates: security
+  version: 1
