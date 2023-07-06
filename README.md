@@ -1,7 +1,7 @@
 # ubuntu serverautoinstall
 ubuntu server autoinstall
 
-grub.cfg
+grub.cfg  
 menu add autoinstall
 
 user-data.bios
