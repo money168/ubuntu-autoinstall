@@ -2,21 +2,31 @@
 autoinstall:
   apt:
     disable_components: []
+    fallback: abort
     geoip: true
+    mirror-selection:
+      primary:
+      - country-mirror
+      - arches:
+        - amd64
+        - i386
+        uri: http://archive.ubuntu.com/ubuntu
+      - arches:
+        - s390x
+        - arm64
+        - armhf
+        - powerpc
+        - ppc64el
+        - riscv64
+        uri: http://ports.ubuntu.com/ubuntu-ports
     preserve_sources_list: false
-    primary:
-    - arches:
-      - amd64
-      - i386
-      uri: http://tw.archive.ubuntu.com/ubuntu
-    - arches:
-      - default
-      uri: http://ports.ubuntu.com/ubuntu-ports
+  codecs:
+    install: false
   drivers:
     install: false
   identity:
-    hostname: bee01
-    password: $6$LsouW3ALRe9VvX1C$jM1tu6Amscsv5nW79OsZ0sONHk16zjvgkmELthSwqqpVM36y7bMk82hWaokJeKVao5bO91L0luFAJb0JN9GC4/
+    hostname: u22
+    password: $6$jGYK2yqL/ERewR7A$kGm5GztrXrQPb7L3wa0VAMeaWj/UuJcUVB/M.T.fOkaV8SvFIMdULOfKHyRDkB..85yVsDPJrtpQ3bsj3Rtnt.
     realname: bee01
     username: bee01
   kernel:
@@ -30,13 +40,9 @@ autoinstall:
     ethernets:
       ens160:
         dhcp4: true
-      ens192:
-        dhcp4: true
-      ens224:
-        dhcp4: true
     version: 2
   source:
-    id: ubuntu-server-minimal
+    id: ubuntu-server
     search_drivers: false
   ssh:
     allow-pw: true
@@ -59,8 +65,9 @@ autoinstall:
       preserve: false
       grub_device: false
       offset: 1048576
+      path: /dev/sda1
       type: partition
-      id: partition-2
+      id: partition-0
     - device: disk-sda
       size: 42946527232
       wipe: superblock
@@ -68,16 +75,60 @@ autoinstall:
       preserve: false
       grub_device: false
       offset: 2097152
+      path: /dev/sda2
       type: partition
-      id: partition-3
-    - fstype: ext4
-      volume: partition-3
+      id: partition-1
+    - fstype: xfs
+      volume: partition-1
       preserve: false
       type: format
-      id: format-1
+      id: format-0
     - path: /
-      device: format-1
+      device: format-0
       type: mount
-      id: mount-1
+      id: mount-0
+
+# swap resize
+    swap:
+      filename: /swap.img
+      size: 4G
+      maxsize: 4G
+
+# instal packages, must connect networking
+  packages:
+    - chrony
+
+# timezone setup
+  timezone: Asia/Taipei
+
+# before autotinstall run commands
+  early-commands:
+    - mkdir /data1
+    - touch /data1/early-commands.txt
+
+# autoinstall finish before reboot 
+  late-commands:
+    - curtin in-target --target /target mkdir data2
+    - curtin in-target --target /target touch data2/late-commands.txt
+#    - curtin in-target --target /target netplan apply
+#    - curtin in-target --target /target systemctl disable ufw
+
+# after reboot run commands
+  user-data:
+    runcmd:
+      - [ mkdir, /data3 ]
+      - [ touch, /data3/runcmd.txt ]
+      - [ systemctl, disable, ufw ]
+#    - sed -i -e '/^Port/s/^.*$/Port 4444/' /etc/ssh/sshd_config
+#    - sed -i -e '/^PermitRootLogin/s/^.*$/PermitRootLogin no/' /etc/ssh/sshd_config
+#    - sed -i -e '$aAllowUsers demo' /etc/ssh/sshd_config
+#    - restart ssh"
+#  user-data:
+#    disable_root: false
+#    users:
+#      - name: test
+#        password: $6$KwuxED22bTL4F46P0
+#        lock_passwd: false
+
   updates: security
   version: 1
